@@ -83,15 +83,15 @@ class DecisionTree(Tree):
         self.compute(x_right, right_child,depth)
 
     def predict(self, x, node=None):
+        
         if not node:
             node = self.root
-            print("Root is Used")
+            #print("Root is Used")
         if node.threshold:
             if node.threshold >=x:
                 if node.left:
-                    print("left exists")
+                    #print("left exists")
                     node = node.left
-                    
                     return(self.predict(x,node))
                 else:
                     print("Threshold: {0}".format(node.parent.threshold))
@@ -99,7 +99,7 @@ class DecisionTree(Tree):
                     return(node.parent.value)
             elif node.threshold < x:
                 if node.right:
-                    print("right exists")
+                    #print("right exists")
                     node = node.right
                     return(self.predict(x,node))
                 else:
@@ -109,23 +109,46 @@ class DecisionTree(Tree):
             else:
                 print("Error")
         else:
-            print("threshold do not exist")
+            #print("threshold do not exist")
             print(node.parent.value)
             if node.parent.threshold:
                 print("parent threshold exists")
             else:
                 print("Alas")
             return(node.parent.value)
+    
+    def score(self, Y, y):
+        ret = sum([(self.predict(value) - y[i])**2 for i,value in enumerate(Y)])
+        print("The SSE is " +str(ret))
+        return(ret)
 
 
 x_data = [3, 33, 146, 227, 342, 351, 353, 444, 556, 571, 709, 759, 836, 860, 968, 1056, 1726, 1846, 1872, 1986, 2311, 2366, 2608, 2676, 3098, 3278, 3288, 4434, 5034, 5049, 5085, 5089, 5089, 5097, 5324, 5389, 5565, 5623, 6080, 6380, 6477, 6740, 7192, 7447, 7644, 7837, 7843, 7922, 8738, 10089, 10237, 10258, 10491, 10625, 10982, 11175, 11411, 11442, 11811, 12559, 12559, 12791, 13121, 13486, 14708, 15251, 15261, 15277, 15806, 16185, 16229, 16358, 17168, 17458, 17758, 18287, 18568, 18728, 19556, 20567, 21012, 21308, 23063, 24127, 25910, 26770, 27753, 28460, 28493, 29361, 30085, 32408, 35338, 36799, 37642, 37654, 37915, 39715, 40580, 42015, 42045, 42188, 42296, 42296, 45406, 46653, 47596, 48296, 49171, 49416, 50145, 52042, 52489, 52875, 53321, 53443, 54433, 55381, 56463, 56485, 56560, 57042, 62551, 62651, 62661, 63732, 64103, 64893, 71043, 74364, 75409,76057, 81542, 82702, 84566, 88682]
 d = list(zip(x_data,list(range(1,len(x_data)+1))))
-dt = DecisionTree(d, max_depth = 10)
+
+hyperparameter = [{'max_depth': {'min': 1, 'max':160}}]
 
 import numpy as np
 import matplotlib.pyplot as plt
-y = np.arange(len(x_data))
-plt.plot(x_data,y)
 
-pred_y = np.asarray([dt.predict(i) for i,y in d])
+
+for parameter in hyperparameter:
+    [parameter_name] = list(parameter.keys())
+    minimum = (parameter[parameter_name].get('min'))
+    maximum = (parameter[parameter_name].get('max'))
+    dt_max = None
+    for i in range(minimum, maximum):
+        dt_i = DecisionTree(d, max_depth = i)        
+        
+        if dt_max == None:
+            dt_max = dt_i
+            continue
+        
+        if (dt_i.score(x_data, y) < dt_max.score(x_data, y)):
+            dt_max = dt_i
+        else:
+            dt_max = dt_max
+            
+plt.plot(x_data,y)
+pred_y = np.asarray([dt_max.predict(i) for i,y in d])
 plt.plot(x_data,pred_y)
