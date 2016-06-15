@@ -1,16 +1,22 @@
 class Node:
-    def __init__(self, name = None):
+    """
+    An object representing Node of a Decision Tree
+    """
+    def __init__(self, name=None):
+        """
+        Init Function
+        """
         self.right = None
         self.left = None
         self.children = [self.left, self.right]
         self.parent = None
         self.name = name
         self.threshold = None
-        self.values  = set()
+
     def add_left(self, node_obj):
         print("Node {1} is added as left child to Node {0}".format(self.name, node_obj.name))
         node_obj.parent = self
-        self.left  = node_obj
+        self.left = node_obj
         self.children = [self.left, self.right]
     def add_right(self, node_obj):
         print("Node {1} is added as right child to Node {0}".format(self.name, node_obj.name))
@@ -24,12 +30,12 @@ class Node:
         pass
 
 class Tree:
-    def __init__(self, root = None):
+    def __init__(self, root=None):
         if root == None:
             self.root = Node(name="Root")
         else:
             self.root = root
-    def add_child(self, child, parent = None, side = None):
+    def add_child(self, child, parent=None, side=None):
         if parent == None:
             parent = self.root
         if side == None:
@@ -51,13 +57,13 @@ class DecisionTree(Tree):
         super().__init__(root=root)
         self.max_depth = max_depth
         self.compute(x, root,0)
-    def compute(self, x , parent, depth):
-        if len(x) <= 2 or depth >= self.max_depth:
-            return
+    def compute(self,x ,parent ,depth):
         import numpy as np
         threshold = np.mean(x)
         print(threshold)
         parent.threshold = threshold
+        if len(x) <= 2 or depth >= self.max_depth:
+            return
         threshold_index =  [1 if xi >= threshold else 0 for i,xi in enumerate(x)].index(1)
         x_left = x[:threshold_index]
         x_right = x[threshold_index:]
